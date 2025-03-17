@@ -32,6 +32,8 @@ public class OrganizacionCliente implements Runnable {
             nombreUsuario = entrada.readLine();
             System.out.println(nombreUsuario + " se ha conectado.");
 
+            Servidor.reenviarMensaje(nombreUsuario + " se ha conectado.", this);
+            
             // Enviar el historial a este cliente
             enviarHistorial();
 

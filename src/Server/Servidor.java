@@ -25,6 +25,7 @@ public class Servidor {
                 clientes.add(organizacionCliente);
                 
                 
+                
                 new Thread(organizacionCliente).start();
             }
         } catch (IOException e) {
