@@ -13,15 +13,10 @@ import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
 import javax.swing.JOptionPane;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
+import Cliente.Cliente;
 
 public class VistaCliente extends JFrame {
 
@@ -31,10 +26,7 @@ public class VistaCliente extends JFrame {
     private JTextField textField;
     private JButton sendButton, logoutButton;
 
-    private Socket socket;
-    private BufferedReader entrada;
-    private PrintWriter salida;
-
+    private Cliente cliente;  // Referencia a la clase Cliente
     private String username;
 
     public static void main(String[] args) {
@@ -43,7 +35,6 @@ public class VistaCliente extends JFrame {
                 try {
                     VistaCliente frame = new VistaCliente();
                     frame.setVisible(true);
-                    frame.connectToServer();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -123,8 +114,8 @@ public class VistaCliente extends JFrame {
                 cerrarSesion();
             }
         });
-        
-     // Configurar acción al cerrar ventana con la X
+
+        // Configurar acción al cerrar ventana con la X
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -132,60 +123,38 @@ public class VistaCliente extends JFrame {
             }
         });
 
+        // Iniciar conexión con el servidor
+        connectToServer();
     }
 
+    // Establecer la conexión con el servidor a través de la clase Cliente
     public void connectToServer() {
-        try {
-            socket = new Socket("localhost", 8080);
-            entrada = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            salida = new PrintWriter(socket.getOutputStream(), true);
-
-            // Envio el nombre de usuario al servidor
-            salida.println(username);
-            salida.println(" se ha conectado");
-
-            // Hilo para recibir mensajes del servidor
-            Thread receiveThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    String mensaje;
-                    try {
-                        while ((mensaje = entrada.readLine()) != null) {
-                            textArea.append(mensaje + "\n");
-                            textArea.setCaretPosition(textArea.getDocument().getLength());
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-            receiveThread.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        cliente = new Cliente("localhost", 8080, username, this);  // Crear instancia de Cliente
     }
 
+    // Método que recibe los mensajes del servidor y los muestra en la interfaz
+    public void recibirMensaje(String mensaje) {
+        textArea.append(mensaje + "\n");
+        textArea.setCaretPosition(textArea.getDocument().getLength());
+    }
+
+    // Enviar mensaje al servidor
     private void sendMessage() {
         String message = textField.getText();
         if (!message.isEmpty()) {
-            salida.println(message); // Enviar mensaje al servidor sin nombre de usuario
+            cliente.enviarMensaje(message);  // Enviar el mensaje utilizando la clase Cliente
             textArea.append("Tú: " + message + "\n"); 
             textField.setText(""); 
             textArea.setCaretPosition(textArea.getDocument().getLength());
         }
     }
 
-    // Cierre de sesión
+    // Cerrar sesión y desconectar
     private void cerrarSesion() {
-        try {
-             
-            socket.close(); 
-            entrada.close(); 
-            salida.close(); 
-            JOptionPane.showMessageDialog(this, "Sesión cerrada con éxito.");
-            System.exit(0); 
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (cliente != null) {
+            cliente.cerrarConexion();  // Cerrar la conexión usando la clase Cliente
         }
+        JOptionPane.showMessageDialog(this, "Sesión cerrada con éxito.");
+        System.exit(0); 
     }
 }

@@ -23,6 +23,8 @@ public class Servidor {
                 // Se organiza la conexión del cliente y se inicia un hilo para gestionarla
                 OrganizacionCliente organizacionCliente = new OrganizacionCliente(socket, clientes, historial);
                 clientes.add(organizacionCliente);
+                
+                
                 new Thread(organizacionCliente).start();
             }
         } catch (IOException e) {
