@@ -18,6 +18,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import Cliente.Cliente;
 
+/*
+VistaCliente: Interfaz gráfica del chat, realizada mediante Java Swing.
+*/
 public class VistaCliente extends JFrame {
 
     private static final long serialVersionUID = 1L;
@@ -152,7 +155,7 @@ public class VistaCliente extends JFrame {
     // Cerrar sesión y desconectar
     private void cerrarSesion() {
         if (cliente != null) {
-            cliente.cerrarConexion();  // Cerrar la conexión usando la clase Cliente
+            cliente.cerrarConexion();  
         }
         JOptionPane.showMessageDialog(this, "Sesión cerrada con éxito.");
         System.exit(0); 

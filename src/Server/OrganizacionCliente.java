@@ -6,21 +6,26 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.List;
-
+/*
+Clase OrganizacionCliente: Representa a un cliente conectado al servidor.
+Se encarga de recibir y enviar mensajes, así como gestionar su desconexión.
+*/
 public class OrganizacionCliente implements Runnable {
-    private Socket socket;
-    private BufferedReader entrada;
-    private PrintWriter salida;
-    private List<OrganizacionCliente> clientes;
-    private List<String> historial;
-    private String nombreUsuario;
+    private Socket socket; // Socket de conexión con el cliente
+    private BufferedReader entrada; // Flujo de entrada para recibir mensajes
+    private PrintWriter salida; // Flujo de salida para enviar mensajes
+    private List<OrganizacionCliente> clientes; // Lista de clientes conectados
+    private List<String> historial; // Historial de mensajes
+    private String nombreUsuario; // Nombre del usuario conectado 
 
+// Constructor de OrganizacionCliente
     public OrganizacionCliente(Socket socket, List<OrganizacionCliente> clientes, List<String> historial) {
         this.socket = socket;
         this.clientes = clientes;
         this.historial = historial;
     } 
 
+// Método ejecutado en un hilo para gestionar la comunicación con el cliente
     @Override
     public void run() { 
         try {
@@ -37,10 +42,9 @@ public class OrganizacionCliente implements Runnable {
             // Enviar el historial a este cliente
             enviarHistorial();
 
-            // Escuchar los mensajes del cliente
+            // Escuchar los mensajes del cliente y reenviarlos
             String mensaje;
             while ((mensaje = entrada.readLine()) != null) {
-                // Reenviar el mensaje a todos los clientes
                 Servidor.reenviarMensaje(nombreUsuario + ": " + mensaje, this);
             }
 
@@ -48,10 +52,10 @@ public class OrganizacionCliente implements Runnable {
             e.printStackTrace();
         } finally {
             try {
-                // Enviar mensaje de desconexión a todos los clientes
+                // Enviar mensaje de desconexión a todos los demás clientes
                 Servidor.reenviarMensaje(nombreUsuario + " se ha desconectado.", this);
               
-                // Cerrar la conexión
+                // Cerrar la conexión y eliminar cliente de la lista
                 socket.close();
                 Servidor.eliminarCliente(this);
                 System.out.println(nombreUsuario + " se ha desconectado.");
@@ -70,7 +74,7 @@ public class OrganizacionCliente implements Runnable {
     private void enviarHistorial() {
         synchronized (historial) {
             for (String mensaje : historial) {
-                enviarMensaje(mensaje); // Enviar cada mensaje almacenado en el historial
+                enviarMensaje(mensaje); 
             }
         }
     }

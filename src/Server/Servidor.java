@@ -6,11 +6,17 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+Clase Servidor: Gestiona la conexión de múltiples clientes a través de hilos (Thread)
+Se encarga de aceptar conexiones, gestionar clientes y reenviar mensajes.
+*/
+
 public class Servidor {
-    private static final int PUERTO = 8080;
+    private static final int PUERTO = 8080; // Puerto de escucha del Servidor
     private static List<OrganizacionCliente> clientes = new ArrayList<>(); // Almacén de clientes
     private static List<String> historial = new ArrayList<>();  // Almacenar el historial de mensajes
 
+// Iniciar Servidor y espera conexiones de clientes.
     public void iniciarServidor() {
         try (ServerSocket serverSocket = new ServerSocket(PUERTO)) {
             System.out.println("Servidor iniciado en el puerto: " + PUERTO);
@@ -24,8 +30,7 @@ public class Servidor {
                 OrganizacionCliente organizacionCliente = new OrganizacionCliente(socket, clientes, historial);
                 clientes.add(organizacionCliente);
                 
-                
-                
+                // Inicia hilo para manejar la comunicación con este cliente
                 new Thread(organizacionCliente).start();
             }
         } catch (IOException e) {
@@ -33,6 +38,7 @@ public class Servidor {
         }
     }
 
+// Reenvía mensajes a todas los clientes excepto al remitente.
     public static synchronized void reenviarMensaje(String mensaje, OrganizacionCliente remitente) {
         // Guardar el mensaje en el historial
         historial.add(mensaje);
@@ -45,10 +51,12 @@ public class Servidor {
         }
     }
 
+// Elimina cliente de la lista cuando se desconecta
     public static synchronized void eliminarCliente(OrganizacionCliente cliente) {
         clientes.remove(cliente);
     }
 
+// Ejecución del Servidor
     public static void main(String[] args) {
         Servidor servidor = new Servidor();
         servidor.iniciarServidor();
